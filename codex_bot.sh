@@ -1,7 +1,10 @@
 #!/bin/bash
 
 TOKEN=$(cat /etc/CodexBotFile/info-bot)
-MP=$(touch /etc/CodexBotFile/info-mp)
+MP=$(cat /etc/CodexBotFile/info-mp)
+SALVAR_PEDIDO=$(cat /etc/CodexBotFile/info-save-order)
+VALOR=$(cat /etc/CodexBotFile/valor-arquivo)
+
 
 CHAT_ID=""
 URL="https://api.telegram.org/bot$TOKEN/sendMessage"
@@ -43,8 +46,6 @@ local result=$(curl -s --request POST \
   then
     CHAT_ID=$(echo $result | jq -r '.result[-1].message.from.id')
         echo $result 
-    else
-         echo "listening..."
   fi
     #CHAT_ID=$(echo $result | jq -r 'result[-1].message.from.id
 }
@@ -123,36 +124,34 @@ Olá <b>$1</b>, Bem vindo!
 
 sendPixCode(){
   payment_result=$(pagamento)
+
   
   paymentID=$(echo $payment_result | jq -r '.id')
   code=$(echo $payment_result | jq -r    '.point_of_interaction.transaction_data.qr_code')
    base64=$(echo $payment_result | jq -r    '.point_of_interaction.transaction_data.qr_code_base64')
   
-   paymentlog=$(curl -s -X POST "https://SSH2-Connect.renatoalcantar3.repl.co/api.php"   -d  chatId=$1 -d paymentID=$paymentID)
-   status=$(echo $paymentLog | jq -r ".status")
-   if [ "$status" == "Success" ]
-   then
-        curl -s -X POST $URL -d chat_id=$CHAT_ID  -d text="O código de pagamento foi gerado, toque nele para copiar." d parse_mode="HTML"
+   paymentlog=$(curl -s -X POST $SALVAR_PEDIDO  -d  chatId=$1 -d paymentID=$paymentID)
+
+   
+  
+   curl -s -X POST $URL -d chat_id=$1  -d text="O código de pagamento foi gerado, toque nele para copiar." d parse_mode="HTML"
         
          curl -s -X POST $URL -d chat_id="$1"  -d text="$code"
          
-         curl -s -X POST $URL -d chat_id=$CHAT_ID  -d text="Assim que recebermos a confirmação do pagamento enviaremos a sua conta automaticamente." d parse_mode="HTML"
+         curl -s -X POST $URL -d chat_id=$1 -d text="Assim que recebermos a confirmação do pagamento enviaremos a sua conta automaticamente." d parse_mode="HTML"
 
-         
-   fi
- 
-   
    
 }
 
 pagamento(){
+  
   local  transaction_request=$(curl -X POST \
     -H 'accept: application/json' \
     -H 'content-type: application/json' \
-    -H 'Authorization: Bearer $MP' \
+    -H 'Authorization: Bearer '$MP\
     'https://api.mercadopago.com/v1/payments' \
     -d '{
-      "transaction_amount": 0.01,
+      "transaction_amount": '$VALOR',
       "description": "Login de 30 dias",
       "payment_method_id": "pix",
       "payer": {
@@ -215,6 +214,7 @@ main(){
             if [ $update_id != $update ] 
             then
               update_id=$update
+              echo $fromId
               sendPixCode $fromId
               update_id=$update
             fi
