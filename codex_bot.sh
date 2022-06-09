@@ -12,7 +12,7 @@ FILE_PATH=$(pwd)
 [[ ! -d "./FILES" ]] && mkdir "./FILES"
 
 check_key_user(){
-  key=$(cat /etc/CodexBot/info-key)
+  key=$(cat /etc/CodexBotFile/info-key)
   verified=$(curl -s -X POST "https://SSH2-Connect.renatoalcantar3.repl.co/verificaChave.php" -d key=$key)
  
   if [ $(echo $verified | jq -r '.validate') == "Success" ]
