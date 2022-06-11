@@ -3,7 +3,7 @@
 TOKEN=$1
 MP=$(cat /etc/CodexBotFile/info-mp)
 SALVAR_PEDIDO=$(cat /etc/CodexBotFile/info-save-order)
-VALOR=$2
+VALOR=$(cat /etc/CodexBotFile/valor-arquivo)
 [[ -f criarteste.sh ]] && chmod +x criarteste.sh
 
 CHAT_ID=""
@@ -179,7 +179,7 @@ pagamento(){
 }
 send_test(){
   chmod +x criarteste.sh
-  ./criarteste.sh 
+  ./criarteste.sh $1  
 }
 update_id=0
 send_apk=0
