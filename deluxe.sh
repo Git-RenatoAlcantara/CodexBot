@@ -4,7 +4,7 @@ TOKEN=$(cat /etc/deluxbotFile/info-bot)
 MP=$(cat /etc/deluxbotFile/info-mp)
 SALVAR_PEDIDO=$(cat /etc/deluxbotFile/info-save-order)
 VALOR=$(cat /etc/deluxbotFile/valor-arquivo)
-LINK_REVENDA=$(/etc/deluxbotFile/link-revenda)
+LINK_REVENDA=$(cat /etc/deluxbotFile/link-revenda)
 
 MESSAGE=""
 CHAT_ID=""
