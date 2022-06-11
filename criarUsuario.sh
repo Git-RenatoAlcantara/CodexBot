@@ -1,4 +1,6 @@
 
+chat_id=$1
+echo $1
 
 #[[ "$(grep -wc $username /etc/passwd)" != '0' ]] && {
 #	echo -e "\n${cor1}Este usuário já existe. tente outro nome!${scor}\n"
@@ -13,7 +15,7 @@
 #limite=$(echo $info | jq -r '.limite')
 
 sshPlusUserCreate(){
-TOKEN=$(cat /etc/deluxbot/info-bot)
+TOKEN=$(cat /etc/deluxbotFile/info-bot)
 
 URL="https://api.telegram.org/bot$TOKEN/sendMessage"
 
@@ -35,7 +37,7 @@ useradd -e $final -M -s /bin/false -p $pass $username >/dev/null 2>&1 &
 echo "$password" >/etc/SSHPlus/senha/$username
 echo "$username $sshlimiter" >>/root/usuarios.db
  
-curl -s -X POST $URL -d chat_id=$1  -d text="
+curl -s -X POST $URL -d chat_id=$chat_id  -d text="
 CONTA SSH CRIADA !
 IP: $IP
 Usuário: $username
