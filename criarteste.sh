@@ -4,6 +4,9 @@ if [ ! -d /etc/SSHPlus/userteste ]; then
 mkdir /etc/SSHPlus/userteste
 fi
 
+TOKEN=$(cat /etc/deluxbotFile/info-bot)
+URL="https://api.telegram.org/bot$TOKEN/sendMessage"
+
 nome=$(echo $RANDOM | md5sum | head -c 9; echo;)
 if [[ -z $nome ]]
 then
@@ -55,6 +58,6 @@ curl -s -X POST $URL -d chat_id=$chat_id -d text="
 <b>Conexao: $limit Apenas</b>
 <b>Duracao: $u_temp Minutos</b>
 ▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬▬
-Depois do tempo de $limit terminar
+Depois do tempo de $u_temp terminar
 Sera desconectado e aconta deletada
-" d parse_mode="HTML"
+" -d parse_mode="HTML"
