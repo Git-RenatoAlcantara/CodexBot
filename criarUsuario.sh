@@ -13,7 +13,7 @@
 #limite=$(echo $info | jq -r '.limite')
 
 sshPlusUserCreate(){
-TOKEN=$(cat /etc/CodexBotFile/info-bot)
+TOKEN=$(cat /etc/deluxbot/info-bot)
 
 URL="https://api.telegram.org/bot$TOKEN/sendMessage"
 
