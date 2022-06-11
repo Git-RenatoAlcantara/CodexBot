@@ -1,6 +1,6 @@
 #!/bin/bash
 
-TOKEN=$1
+TOKEN=$(cat /etc/CodexBotFile/info-bot)
 MP=$(cat /etc/CodexBotFile/info-mp)
 SALVAR_PEDIDO=$(cat /etc/CodexBotFile/info-save-order)
 VALOR=$(cat /etc/CodexBotFile/valor-arquivo)
@@ -20,7 +20,7 @@ check_key_user(){
  
   if [ $(echo $verified | jq -r '.validate') == "Success" ]
   then
-    echo $TOKEN
+    main
   else
     exit 1
   fi
