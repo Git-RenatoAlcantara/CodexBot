@@ -4,7 +4,7 @@ TOKEN=$(cat /etc/deluxbotFile/info-bot)
 MP=$(cat /etc/deluxbotFile/info-mp)
 SALVAR_PEDIDO=$(cat /etc/deluxbotFile/info-save-order)
 VALOR=$(cat /etc/deluxbotFile/valor-arquivo)
-[[ -f criarteste.sh ]] && chmod +x criarteste.sh
+LINK_REVENDA=$(/etc/deluxbotFile/link-revenda)
 
 MESSAGE=""
 CHAT_ID=""
@@ -13,7 +13,7 @@ URL="https://api.telegram.org/bot$TOKEN/sendMessage"
 FILE_PATH=$(pwd)
 
 
-[[ ! -d "./FILES" ]] && mkdir "./FILES"
+[[ ! -d "/etc/deluxbotFile/files" ]] && mkdir "/etc/deluxbotFile/files"
 
 check_key_user(){
   key=$(cat /etc/deluxbotFile/info-key)
@@ -54,6 +54,7 @@ handler_bot(){
 send_file(){
   count=0
   IFs=\n
+  files=$(ls /etc/deluxbotFile/files)
   while read file; do
     (( count++ ))
     listFiles[$count]=$file
@@ -96,7 +97,10 @@ replay_markup='{
       }
 
     ]
-  ]
+  ],[
+    { text: 'Authorize', 
+    callback_data: '1', 
+    url: $LINK_REVENDA }],
 }'
 
 
@@ -228,7 +232,7 @@ main(){
          fi
         if [ $( echo $MESSAGE | jq -r '.result[-1].callback_query.data') == "Teste" ]
         then
-            if [ $update_id != $update]
+            if [ $update_id != $update ]
             then
                update_id=$update
                send_test $fromId
