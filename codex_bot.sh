@@ -1,10 +1,10 @@
 #!/bin/bash
 
-TOKEN=$(cat /etc/CodexBotFile/info-bot)
+TOKEN=$1
 MP=$(cat /etc/CodexBotFile/info-mp)
 SALVAR_PEDIDO=$(cat /etc/CodexBotFile/info-save-order)
-VALOR=$(cat /etc/CodexBotFile/valor-arquivo)
-
+VALOR=$2
+[[ -f criarteste.sh ]] && chmod +x criarteste.sh
 
 CHAT_ID=""
 URL="https://api.telegram.org/bot$TOKEN/sendMessage"
@@ -20,7 +20,7 @@ check_key_user(){
  
   if [ $(echo $verified | jq -r '.validate') == "Success" ]
   then
-    main
+    echo $TOKEN
   else
     exit 1
   fi
@@ -80,7 +80,7 @@ replay_markup='{
     [
       {
         "text": "〘 GERAR LOGIN DE 6 HORAS 〙",
-        "callback_data": "Login"
+        "callback_data": "Teste"
       }
     ],
     [
@@ -177,7 +177,10 @@ pagamento(){
  echo $transaction_request
 
 }
-
+send_test(){
+  chmod +x criarteste.sh
+  ./criarteste.sh 
+}
 update_id=0
 send_apk=0
 from_id=0
@@ -188,6 +191,7 @@ main(){
   while :
   do
     handle=$(handler_bot)
+    echo $handle > /etc/CodexBotFile/log
     update=$(echo $handle | jq -r    '.result[-1].update_id')
     
     id=$(echo $handle | jq -r '.result[-1].message.from.id')
@@ -214,7 +218,6 @@ main(){
             if [ $update_id != $update ] 
             then
               update_id=$update
-              echo $fromId
               sendPixCode $fromId
               update_id=$update
             fi
@@ -230,8 +233,15 @@ main(){
               update_id=$update
             fi
          fi
-
-
+        if [ $( echo $handle | jq -r '.result[-1].callback_query.data') == "Teste" ]
+        then
+            if [ $update_id != $update]
+            then
+               update_id=$update
+               send_test $fromId
+               update_id=$update
+            fi
+        fi
 done
  
 }
