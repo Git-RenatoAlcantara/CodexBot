@@ -44,7 +44,7 @@ exit" > /etc/SSHPlus/userteste/$nome.sh
 chmod +x /etc/SSHPlus/userteste/$nome.sh
 at -f /etc/SSHPlus/userteste/$nome.sh now + $u_temp min > /dev/null 2>&1
 
-chat_id=$5
+chat_id=$1
 
 curl -s -X POST $URL -d chat_id=$chat_id -d text="
 <b>Conta de teste criada!</b>
