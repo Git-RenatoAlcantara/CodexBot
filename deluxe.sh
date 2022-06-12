@@ -4,7 +4,7 @@ TOKEN=$(cat /etc/deluxbotFile/info-bot)
 MP=$(cat /etc/deluxbotFile/info-mp)
 SALVAR_PEDIDO=$(cat /etc/deluxbotFile/info-save-order)
 VALOR=$(cat /etc/deluxbotFile/valor-arquivo)
-LINK_REVENDA=$(cat /etc/deluxbotFile/link-revenda)
+REVENDA=$(cat /etc/deluxbotFile/link-revenda)
 
 MESSAGE=""
 CHAT_ID=""
@@ -73,7 +73,7 @@ replay_markup='{
 "inline_keyboard": [
     [
       {
-        "text": "〘 GERAR LOGIN DE 6 HORAS 〙",
+        "text": "〘 GERAR LOGIN DE 1 HORAS 〙",
         "callback_data": "Teste"
       }
     ],
@@ -86,7 +86,8 @@ replay_markup='{
    [
         {
             "text": "〘 SEJA REVENDEDOR 〙",
-            "callback_data": "Revender"
+            "callback_data": "Revender",
+            "url": "$REVENDA"
           }
 
     ],
@@ -97,10 +98,7 @@ replay_markup='{
       }
 
     ]
-  ],[
-    { text: 'Authorize', 
-    callback_data: '1', 
-    url: $LINK_REVENDA }],
+  ]
 }'
 
 
@@ -175,8 +173,8 @@ pagamento(){
 
 }
 send_test(){
-  chmod +x criarteste.sh
-  ./criarteste.sh $1  
+  chmod +x /etc/deluxbotFile/criarteste.sh
+  /etc/deluxbotFile/./criarteste.sh $1  
 }
 update_id=0
 send_apk=0
