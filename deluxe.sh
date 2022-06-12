@@ -68,6 +68,7 @@ send_file(){
 
 mainMenu(){
 
+echo $REVENDA
 
 replay_markup='{
 "inline_keyboard": [
@@ -84,10 +85,10 @@ replay_markup='{
       }
    ],
    [
-        {
+      {
             "text": "〘 SEJA REVENDEDOR 〙",
             "callback_data": "Revender",
-            "url": "$REVENDA"
+            "url": "'${REVENDA}'"
           }
 
     ],
@@ -102,7 +103,7 @@ replay_markup='{
 }'
 
 
-
+echo $replay_markup
 
    
 curl -s -X POST $URL -d chat_id=$CHAT_ID  -d text="
