@@ -2,7 +2,7 @@
 
 TOKEN=$(cat /etc/deluxbotFile/info-bot)
 MP=$(cat /etc/deluxbotFile/info-mp)
-SALVAR_PEDIDO=$(cat /etc/deluxbotFile/info-save-order)
+SALVAR_PEDIDO=$(cat /etc/deluxbotFile/page-save-order)
 VALOR=$(cat /etc/deluxbotFile/valor-arquivo)
 REVENDA=$(cat /etc/deluxbotFile/link-revenda)
 DATABASE=$(cat /etc/deluxbotFile/database.db)
