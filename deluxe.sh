@@ -128,10 +128,15 @@ Olá <b>$1</b>, Bem vindo!
 }
 
 sendPixCode(){
+  
   payment_result=$(pagamento)
-  if [ -n "${payment_result}" ]
+ 
+  
+  if [ -n $(echo $payment_result | jq -r '.id') ]
   then
   paymentID=$(echo $payment_result | jq -r '.id')
+ 
+ 
   code=$(echo $payment_result | jq -r    '.point_of_interaction.transaction_data.qr_code')
    base64=$(echo $payment_result | jq -r    '.point_of_interaction.transaction_data.qr_code_base64')
   
@@ -142,25 +147,25 @@ sendPixCode(){
    curl -s -X POST $URL -d chat_id=$1  -d text="O código de pagamento foi gerado, toque nele para copiar." d parse_mode="HTML"
         
    curl -s -X POST $URL -d chat_id="$1"  -d text="$code"
-         
+     
+       
    curl -s -X POST $URL -d chat_id=$1 -d text="Assim que recebermos a confirmação do pagamento enviaremos a sua conta automaticamente." -d parse_mode="HTML"
 
    fi
 }
 
 pagamento(){
-  if [ -n "${MP}" ]
-  then
-   
-    
-     local  transaction_request=$(
+  VALOR=$(cat /etc/deluxbotFile/valor-arquivo)
+
+ 
+   local transaction_request=$(
     curl -X POST \
     --url https://api.mercadopago.com/v1/payments \
     --header 'accept: application/json' \
     --header 'content-type: application/json' \
-    --header 'Authorization: Bearer ${MP}' \
+    --header 'Authorization: Bearer '$MP \
     --data '{
-      "transaction_amount": $VALOR,
+      "transaction_amount": '$VALOR',
       "description": "Título do produto",
       "payment_method_id": "pix",
       "payer": {
@@ -183,7 +188,6 @@ pagamento(){
     }'
   )
    echo $transaction_request
-  fi
 
 
 
