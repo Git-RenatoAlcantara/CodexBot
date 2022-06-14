@@ -5,15 +5,15 @@ MP=$(cat /etc/deluxbotFile/info-mp)
 SALVAR_PEDIDO=$(cat /etc/deluxbotFile/info-save-order)
 VALOR=$(cat /etc/deluxbotFile/valor-arquivo)
 REVENDA=$(cat /etc/deluxbotFile/link-revenda)
-
+DATABASE=$(cat /etc/deluxbotFile/database.db)
+MESSAGE_ID=""
+[[ ! -f /etc/deluxbotFile/database.db ]] && touch /etc/deluxbotFile/database.db
+  
 MESSAGE=""
 CHAT_ID=""
 URL="https://api.telegram.org/bot$TOKEN/sendMessage"
-
+update_id=0
 FILE_PATH=$(pwd)
-
-
-[[ ! -d "/etc/deluxbotFile/files" ]] && mkdir "/etc/deluxbotFile/files"
 
 check_key_user(){
   key=$(cat /etc/deluxbotFile/info-key)
@@ -45,8 +45,17 @@ handler_bot(){
 
   if [ -n "$conexao" ]
   then
-    CHAT_ID=$(echo $result | jq -r '.result[-1].message.from.id')
-        MESSAGE=$result
+    
+    MESSAGE=$result
+    update_id=$( echo $MESSAGE | jq -r '.result[-1].update_id')
+    MESSAGE_ID=$(echo $MESSAGE | jq -r '.result[-1].message_id')
+
+
+        #CHAT_ID=$(echo $MESSAGE | jq -r 'result[-1].message.from.id')
+        
+        CHAT_ID=$(echo $MESSAGE | jq -r '.result[-1].message.from.id')
+        
+        echo $result > log
   fi
     #CHAT_ID=$(echo $result | jq -r 'result[-1].message.from.id
 }
@@ -59,16 +68,14 @@ send_file(){
     (( count++ ))
     listFiles[$count]=$file
   done <<< $files
-  $send="${listFiles[1]}"
-
-  curl -v -F "chat_id=$1" -F document="@/root/FILES/$send" "https://api.telegram.org/bot$TOKEN/sendDocument"
+ send="${listFiles[1]}"
+  curl -v -F "chat_id=$1" -F document="@/etc/deluxbotFile/files/$send" "https://api.telegram.org/bot$TOKEN/sendDocument"
   
 }
 
 
 mainMenu(){
 
-echo $REVENDA
 
 replay_markup='{
 "inline_keyboard": [
@@ -116,12 +123,15 @@ Olá <b>$1</b>, Bem vindo!
 ✅ Ser revendedor
 ✅ Entrar em contato
 ✅ Baixar arquivo de conexão "  -d reply_markup="$replay_markup" -d parse_mode="HTML"
+
+
 }
 
 sendPixCode(){
   payment_result=$(pagamento)
 
-  
+  if [ -n "${payment_result}" ]
+  then
   paymentID=$(echo $payment_result | jq -r '.id')
   code=$(echo $payment_result | jq -r    '.point_of_interaction.transaction_data.qr_code')
    base64=$(echo $payment_result | jq -r    '.point_of_interaction.transaction_data.qr_code_base64')
@@ -134,110 +144,146 @@ sendPixCode(){
         
          curl -s -X POST $URL -d chat_id="$1"  -d text="$code"
          
-         curl -s -X POST $URL -d chat_id=$1 -d text="Assim que recebermos a confirmação do pagamento enviaremos a sua conta automaticamente." d parse_mode="HTML"
+         curl -s -X POST $URL -d chat_id=$1 -d text="Assim que recebermos a confirmação do pagamento enviaremos a sua conta automaticamente." -d parse_mode="HTML"
 
-   
+   fi
 }
 
 pagamento(){
-  
-  local  transaction_request=$(curl -X POST \
+  if [ -n "${MP}" ]
+  then
+    echo "MP"$MP
+    echo "VALOR"$VALOR
+    
+     local  transaction_request=$(
+    curl -X POST \
     -H 'accept: application/json' \
     -H 'content-type: application/json' \
-    -H 'Authorization: Bearer '$MP\
+    -H 'Authorization: Bearer ' $MP \
     'https://api.mercadopago.com/v1/payments' \
     -d '{
-      "transaction_amount": '$VALOR',
-      "description": "Login de 30 dias",
+      "transaction_amount": ${VALOR},
+      "description": "Título do produto",
       "payment_method_id": "pix",
       "payer": {
-        "email": "luciaaliciasantos@tribunadeindaia.com.br",
-        "first_name": "Lúcia",
-        "last_name": "Alícia Santos",
+        "email": "test@test.com",
+        "first_name": "Test",
+        "last_name": "User",
         "identification": {
             "type": "CPF",
-            "number": "98535094075"
+            "number": "19119119100"
         },
         "address": {
-            "zip_code": "60763096",
-            "street_name": "Travessa Brumado",
-            "street_number": "467",
+            "zip_code": "06233200",
+            "street_name": "Av. das Nações Unidas",
+            "street_number": "3003",
             "neighborhood": "Bonfim",
-            "city": "Fortaleza",
-            "federal_unit": "CE"
+            "city": "Osasco",
+            "federal_unit": "SP"
         }
       }
     }'
-)
+  )
+   echo $transaction_request
+  fi
 
- echo $transaction_request
+
 
 }
 send_test(){
-  chmod +x /etc/deluxbotFile/criarteste.sh
-  /etc/deluxbotFile/./criarteste.sh $1  
+  lista=$(awk -F\|n '{print}' /etc/deluxbotFile/database.db)
+  n=0
+
+  for id in $lista;do
+    if [ $1 == $id ]
+    then
+      n=1
+    fi
+  done
+
+  if [ $n == 0 ]
+  then
+    chmod +x /etc/deluxbotFile/criarteste.sh
+    echo $1 >> /etc/deluxbotFile/database.db
+    /etc/deluxbotFile/./criarteste.sh $1  
+   else
+    curl -s -X POST $URL -d chat_id=$1  -d text="<b>Você já recebeu seu teste grátis</b>" -d parse_mode="HTML"  
+  fi
+
 }
-update_id=0
-send_apk=0
+
+
 from_id=0
 currentChat=0
-first=0
-
+NEXT_MESSAGE=0
+CALLBACK=0
+NEW_UPDATE=0
 main(){
   while :
   do
     handler_bot
-    echo $MESSAGE > /etc/deluxbotFile/log
-    update=$(echo $MESSAGE | jq -r    '.result[-1].update_id')
-    
-    id=$(echo $MESSAGE | jq -r '.result[-1].message.from.id')
-      CHAT_ID=$id
-      currentChat=$id
-     
-        if [ $update_id != $update ] 
-        then
-            if [  $(echo $MESSAGE | jq -r '.result[-1].message.text')  == "/start" ];
-            then
-                user=$(echo $MESSAGE | jq -r '.result[-1].message.from.username')
+    if [ $update_id != $NEW_UPDATE ]
+    then
+      echo $MESSAGE > /etc/deluxbotFile/log
+      MESSAGE_ID=$(echo $MESSAGE | jq -r '.result[-1].message.message_id')
+  
+           if [  $(echo $MESSAGE | jq -r '.result[-1].message.text')  == "/start" ];
+           then
+               user=$(echo $MESSAGE | jq -r '.result[-1].message.from.username')
                 
-                  update_id=$update
+                  
                   mainMenu "$user"
-                  update_id=$update
+                 NEW_UPDATE=$(echo $MESSAGE | jq -r '.result[-1].update_id')
+           
+          fi
+     fi
+      echo $MESSAGE | jq -r '.result[-1]'
+      if [ $(echo $MESSAGE | jq -r '.result[-1].callback_query.data') ]
+      then
+
+        if [ $update_id != $NEW_UPDATE ]
+        then
+          if [  $( echo $MESSAGE | jq -r '.result[-1].callback_query.data') == "Arquivo" ];
+          then
+        
+              CHAT_ID=$(echo $MESSAGE | jq -r '.result[-1].callback_query.from.id')
+                send_file $CHAT_ID
                 
+                NEW_UPDATE=$(echo $MESSAGE | jq -r '.result[-1].update_id')
            fi
+        fi
+
+
+        if [ $update_id != $NEW_UPDATE ]
+        then
+              if [  $( echo $MESSAGE | jq -r '.result[-1].callback_query.data') == "Pagamento" ]
+                 then
+                    CHAT_ID=$(echo $MESSAGE | jq -r '.result[-1].callback_query.from.id')
+                    
+                    sendPixCode $CHAT_ID
+                    
+                    NEW_UPDATE=$(echo $MESSAGE | jq -r '.result[-1].update_id')
+              fi
+
+          fi
+        
+        
+        if [ $update_id != $NEW_UPDATE ]
+        then
+              if [  $( echo $MESSAGE | jq -r '.result[-1].callback_query.data') == "Teste" ]
+                 then
+                    CHAT_ID=$(echo $MESSAGE | jq -r '.result[-1].callback_query.from.id')
+                    
+                    send_test $CHAT_ID
+                    
+                    NEW_UPDATE=$(echo $MESSAGE | jq -r '.result[-1].update_id')
+              fi
+          fi
+
+
+        
      fi
 
-      fromId=$( echo $MESSAGE | jq -r '.result[-1].callback_query.message.chat.id')
-        
-      if [  $( echo $MESSAGE | jq -r '.result[-1].callback_query.data') == "Pagamento" ]
-         then
-            if [ $update_id != $update ] 
-            then
-              update_id=$update
-              sendPixCode $fromId
-              update_id=$update
-            fi
-         fi
-
-        if [  $( echo $MESSAGE | jq -r '.result[-1].callback_query.data') == "Arquivo" ]
-         then
-            if [ $update_id != $update ] 
-            then
-              
-              update_id=$update
-              send_file $fromId
-              update_id=$update
-            fi
-         fi
-        if [ $( echo $MESSAGE | jq -r '.result[-1].callback_query.data') == "Teste" ]
-        then
-            if [ $update_id != $update ]
-            then
-               update_id=$update
-               send_test $fromId
-               update_id=$update
-            fi
-        fi
 done
  
 }

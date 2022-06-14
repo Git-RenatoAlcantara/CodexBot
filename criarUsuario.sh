@@ -1,6 +1,5 @@
 
 chat_id=$1
-echo $1
 
 #[[ "$(grep -wc $username /etc/passwd)" != '0' ]] && {
 #	echo -e "\n${cor1}Este usuário já existe. tente outro nome!${scor}\n"
