@@ -129,7 +129,6 @@ Olá <b>$1</b>, Bem vindo!
 
 sendPixCode(){
   payment_result=$(pagamento)
- echo $payment_result
   if [ -n "${payment_result}" ]
   then
   paymentID=$(echo $payment_result | jq -r '.id')
@@ -236,7 +235,8 @@ main(){
            
           fi
      fi
-      echo $MESSAGE | jq -r '.result[-1]'
+      
+      
       if [ $(echo $MESSAGE | jq -r '.result[-1].callback_query.data') ]
       then
 
