@@ -129,7 +129,7 @@ Olá <b>$1</b>, Bem vindo!
 
 sendPixCode(){
   payment_result=$(pagamento)
-
+ echo $payment_result
   if [ -n "${payment_result}" ]
   then
   paymentID=$(echo $payment_result | jq -r '.id')
@@ -142,9 +142,9 @@ sendPixCode(){
   
    curl -s -X POST $URL -d chat_id=$1  -d text="O código de pagamento foi gerado, toque nele para copiar." d parse_mode="HTML"
         
-         curl -s -X POST $URL -d chat_id="$1"  -d text="$code"
+   curl -s -X POST $URL -d chat_id="$1"  -d text="$code"
          
-         curl -s -X POST $URL -d chat_id=$1 -d text="Assim que recebermos a confirmação do pagamento enviaremos a sua conta automaticamente." -d parse_mode="HTML"
+   curl -s -X POST $URL -d chat_id=$1 -d text="Assim que recebermos a confirmação do pagamento enviaremos a sua conta automaticamente." -d parse_mode="HTML"
 
    fi
 }
@@ -152,17 +152,16 @@ sendPixCode(){
 pagamento(){
   if [ -n "${MP}" ]
   then
-    echo "MP"$MP
-    echo "VALOR"$VALOR
+   
     
      local  transaction_request=$(
     curl -X POST \
-    -H 'accept: application/json' \
-    -H 'content-type: application/json' \
-    -H 'Authorization: Bearer ' $MP \
-    'https://api.mercadopago.com/v1/payments' \
-    -d '{
-      "transaction_amount": ${VALOR},
+    --url https://api.mercadopago.com/v1/payments \
+    --header 'accept: application/json' \
+    --header 'content-type: application/json' \
+    --header 'Authorization: Bearer ${MP}' \
+    --data '{
+      "transaction_amount": $VALOR,
       "description": "Título do produto",
       "payment_method_id": "pix",
       "payer": {
