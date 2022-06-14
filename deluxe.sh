@@ -131,9 +131,7 @@ sendPixCode(){
   
   payment_result=$(pagamento)
  
-  
-  if [ -n $(echo $payment_result | jq -r '.id') ]
-  then
+ 
   paymentID=$(echo $payment_result | jq -r '.id')
  
  
@@ -151,7 +149,7 @@ sendPixCode(){
        
    curl -s -X POST $URL -d chat_id=$1 -d text="Assim que recebermos a confirmação do pagamento enviaremos a sua conta automaticamente." -d parse_mode="HTML"
 
-   fi
+ 
 }
 
 pagamento(){
